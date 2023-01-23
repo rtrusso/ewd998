@@ -61,9 +61,14 @@ NodePassesToken(node) ==
     /\ UNCHANGED TerminationDetected
     /\ UNCHANGED NodeMessageCounter
 
+DetectTermination == 
+    /\ TokenOwner = NumberOfNodes+1
+    /\ TokenColor = "Purple"
+    /\ TokenCounter = 0
+
 UpdateTerminationDetected ==
     /\ TerminationDetected = FALSE
-    /\ TokenOwner = NumberOfNodes + 1
+    /\ DetectTermination
     /\ TerminationDetected' = TRUE
     /\ UNCHANGED NodeWorking
     /\ UNCHANGED Network
@@ -92,24 +97,24 @@ NodeReceives(sourceNode) ==
     /\ UNCHANGED TokenOwner
     /\ UNCHANGED << TokenColor, TokenCounter >>
 
-DetectTermination == 
+InitiateNewRound ==
     /\ TokenOwner = NumberOfNodes+1
-    /\ UNCHANGED NodeWorking
-    /\ UNCHANGED Network
-    /\ UNCHANGED NodeWorking
-    /\ UNCHANGED TokenOwner
-    /\ UNCHANGED TerminationDetected
-    /\ UNCHANGED NodeMessageCounter
-    /\ UNCHANGED << NodeColor, TokenColor, TokenCounter >>
+    /\ (TokenColor = "Green" \/ TokenCounter # 0)
+    /\ TokenOwner' = 1
+    /\ TokenColor' = "Purple"
+    \* /\ TokenCounter' = 0
+    /\ NodeColor' = [NodeColor EXCEPT ![1] = "Purple"]
+    /\ UNCHANGED << Network, TerminationDetected >>
+    /\ UNCHANGED << NodeWorking, NodeMessageCounter >>
 
 Next ==
     \E node \in ATD!Nodes :
         \/ NodeFinishesWork(node)
         \/ NodePassesToken(node)
-        \/ DetectTermination
-        \/ UpdateTerminationDetected
         \/ SendMessage(node)
         \/ NodeReceives(node)
+        \/ UpdateTerminationDetected
+        \/ InitiateNewRound
 
 
 Spec ==
