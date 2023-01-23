@@ -8,25 +8,36 @@ VARIABLE
     Network,
     NodeWorking,
     NodeMessageCounter,
-    Token
+    NodeColor,
+    TokenColor,
+    TokenCounter,
+    TokenOwner
 
-vars == << TerminationDetected, Network, NodeWorking, Token, NodeMessageCounter >>
+vars == << TerminationDetected, Network, NodeWorking, TokenOwner, NodeMessageCounter, NodeColor, TokenColor, TokenCounter >>
 
 ATD == INSTANCE A3
+Nodes == ATD!Nodes
+Colors == { "Pink", "Green" }
 
 TypeOk ==
-    /\ Token \in Nat
-    /\ Token > 0
-    /\ Token <= NumberOfNodes+1
+    /\ TokenOwner \in Nat
+    /\ TokenOwner > 0
+    /\ TokenOwner <= NumberOfNodes+1
     /\ ATD!TypeOk
-    /\ NodeMessageCounter \in [ATD!Nodes -> Int]
+    /\ NodeMessageCounter \in [Nodes -> Int]
+    /\ NodeColor \in [Nodes -> Colors]
+    /\ TokenColor \in Colors
+    /\ TokenCounter \in Int
 
 Init ==
     /\ NodeWorking = [node \in ATD!Nodes |-> (node \div 2) * 2 = node ]
     /\ Network = [node \in ATD!Nodes |-> 0]
     /\ TerminationDetected = FALSE
-    /\ Token = 1
+    /\ TokenOwner = 1
     /\ NodeMessageCounter = [node \in ATD!Nodes |-> 0]
+    /\ NodeColor = [node \in Nodes |-> "Pink"]
+    /\ TokenColor = "Pink"
+    /\ TokenCounter = 0
 
 NodeFinishesWork(node) ==
     /\ NodeWorking[node] = TRUE
@@ -34,27 +45,30 @@ NodeFinishesWork(node) ==
     /\ NodeWorking' = [NodeWorking EXCEPT ![node] = FALSE]
     /\ UNCHANGED Network
     /\ UNCHANGED TerminationDetected
-    /\ UNCHANGED Token
+    /\ UNCHANGED TokenOwner
     /\ UNCHANGED NodeMessageCounter
+    /\ UNCHANGED << NodeColor, TokenColor, TokenCounter >>
 
 NodePassesToken(node) == 
-    /\ Token = node
+    /\ TokenOwner = node
     /\ NodeWorking[node] = FALSE
-    /\ Token' = Token + 1
+    /\ TokenOwner' = TokenOwner + 1
     /\ UNCHANGED Network
     /\ UNCHANGED NodeWorking
     /\ UNCHANGED TerminationDetected
     /\ UNCHANGED NodeMessageCounter
+    /\ UNCHANGED << NodeColor, TokenColor, TokenCounter >>
 
 UpdateTerminationDetected ==
     /\ TerminationDetected = FALSE
-    /\ Token = NumberOfNodes + 1
+    /\ TokenOwner = NumberOfNodes + 1
     /\ TerminationDetected' = TRUE
     /\ UNCHANGED NodeWorking
     /\ UNCHANGED Network
     /\ UNCHANGED NodeWorking
-    /\ UNCHANGED Token
+    /\ UNCHANGED TokenOwner
     /\ UNCHANGED NodeMessageCounter
+    /\ UNCHANGED << NodeColor, TokenColor, TokenCounter >>
 
 SendMessage(sourceNode) ==
     \E destinationNode \in ATD!Nodes :
@@ -63,7 +77,8 @@ SendMessage(sourceNode) ==
       /\ NodeMessageCounter' = [NodeMessageCounter EXCEPT ![sourceNode] = @ + 1]
       /\ UNCHANGED NodeWorking
       /\ UNCHANGED TerminationDetected
-      /\ UNCHANGED Token
+      /\ UNCHANGED TokenOwner
+      /\ UNCHANGED << NodeColor, TokenColor, TokenCounter >>
 
 NodeReceives(sourceNode) ==
     /\ Network[sourceNode] > 0
@@ -71,16 +86,18 @@ NodeReceives(sourceNode) ==
     /\ NodeWorking' = [NodeWorking EXCEPT ![sourceNode] = TRUE]
     /\ NodeMessageCounter' = [NodeMessageCounter EXCEPT ![sourceNode] = @ - 1]
     /\ UNCHANGED TerminationDetected
-    /\ UNCHANGED Token
+    /\ UNCHANGED TokenOwner
+    /\ UNCHANGED << NodeColor, TokenColor, TokenCounter >>
 
 DetectTermination == 
-    /\ Token = NumberOfNodes+1
+    /\ TokenOwner = NumberOfNodes+1
     /\ UNCHANGED NodeWorking
     /\ UNCHANGED Network
     /\ UNCHANGED NodeWorking
-    /\ UNCHANGED Token
+    /\ UNCHANGED TokenOwner
     /\ UNCHANGED TerminationDetected
     /\ UNCHANGED NodeMessageCounter
+    /\ UNCHANGED << NodeColor, TokenColor, TokenCounter >>
 
 Next ==
     \E node \in ATD!Nodes :
