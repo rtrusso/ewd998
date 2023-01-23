@@ -54,11 +54,12 @@ NodePassesToken(node) ==
     /\ NodeWorking[node] = FALSE
     /\ TokenOwner' = TokenOwner + 1
     /\ TokenCounter' = TokenCounter + NodeMessageCounter[node]
+    /\ TokenColor' = IF NodeColor[node] = "Green" THEN "Green" ELSE TokenColor
+    /\ NodeColor' = [NodeColor EXCEPT ![node] = "Purple"]
     /\ UNCHANGED Network
     /\ UNCHANGED NodeWorking
     /\ UNCHANGED TerminationDetected
     /\ UNCHANGED NodeMessageCounter
-    /\ UNCHANGED << NodeColor, TokenColor >>
 
 UpdateTerminationDetected ==
     /\ TerminationDetected = FALSE
