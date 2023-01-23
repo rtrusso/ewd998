@@ -7,9 +7,10 @@ VARIABLE
     TerminationDetected,
     Network,
     NodeWorking,
+    NodeMessageCounter,
     Token
 
-vars == << TerminationDetected, Network, NodeWorking, Token >>
+vars == << TerminationDetected, Network, NodeWorking, Token, NodeMessageCounter >>
 
 ATD == INSTANCE A3
 
@@ -18,6 +19,14 @@ TypeOk ==
     /\ Token > 0
     /\ Token <= NumberOfNodes+1
     /\ ATD!TypeOk
+    /\ NodeMessageCounter \in [ATD!Nodes -> Int]
+
+Init ==
+    /\ NodeWorking = [node \in ATD!Nodes |-> (node \div 2) * 2 = node ]
+    /\ Network = [node \in ATD!Nodes |-> 0]
+    /\ TerminationDetected = FALSE
+    /\ Token = 1
+    /\ NodeMessageCounter = [node \in ATD!Nodes |-> 0]
 
 NodeFinishesWork(node) ==
     /\ NodeWorking[node] = TRUE
@@ -26,6 +35,7 @@ NodeFinishesWork(node) ==
     /\ UNCHANGED Network
     /\ UNCHANGED TerminationDetected
     /\ UNCHANGED Token
+    /\ UNCHANGED NodeMessageCounter
 
 NodePassesToken(node) == 
     /\ Token = node
@@ -34,6 +44,7 @@ NodePassesToken(node) ==
     /\ UNCHANGED Network
     /\ UNCHANGED NodeWorking
     /\ UNCHANGED TerminationDetected
+    /\ UNCHANGED NodeMessageCounter
 
 UpdateTerminationDetected ==
     /\ TerminationDetected = FALSE
@@ -43,12 +54,13 @@ UpdateTerminationDetected ==
     /\ UNCHANGED Network
     /\ UNCHANGED NodeWorking
     /\ UNCHANGED Token
-
+    /\ UNCHANGED NodeMessageCounter
 
 SendMessage(sourceNode) ==
     \E destinationNode \in ATD!Nodes :
       /\ NodeWorking[sourceNode] = TRUE
       /\ Network' = [Network EXCEPT ![destinationNode] = @ + 1]
+      /\ NodeMessageCounter' = [NodeMessageCounter EXCEPT ![sourceNode] = @ + 1]
       /\ UNCHANGED NodeWorking
       /\ UNCHANGED TerminationDetected
       /\ UNCHANGED Token
@@ -57,6 +69,7 @@ NodeReceives(sourceNode) ==
     /\ Network[sourceNode] > 0
     /\ Network' = [Network EXCEPT ![sourceNode] = @ - 1]
     /\ NodeWorking' = [NodeWorking EXCEPT ![sourceNode] = TRUE]
+    /\ NodeMessageCounter' = [NodeMessageCounter EXCEPT ![sourceNode] = @ - 1]
     /\ UNCHANGED TerminationDetected
     /\ UNCHANGED Token
 
@@ -67,12 +80,7 @@ DetectTermination ==
     /\ UNCHANGED NodeWorking
     /\ UNCHANGED Token
     /\ UNCHANGED TerminationDetected
-
-Init ==
-    /\ NodeWorking = [node \in ATD!Nodes |-> (node \div 2) * 2 = node ]
-    /\ Network = [node \in ATD!Nodes |-> 0]
-    /\ TerminationDetected = FALSE
-    /\ Token = 1
+    /\ UNCHANGED NodeMessageCounter
 
 Next ==
     \E node \in ATD!Nodes :
