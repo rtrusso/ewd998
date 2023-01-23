@@ -106,6 +106,7 @@ InitiateNewRound ==
     /\ NodeColor' = [NodeColor EXCEPT ![1] = "Purple"]
     /\ UNCHANGED << Network, TerminationDetected >>
     /\ UNCHANGED << NodeWorking, NodeMessageCounter >>
+    /\ UNCHANGED << TokenCounter >>
 
 Next ==
     \E node \in ATD!Nodes :
