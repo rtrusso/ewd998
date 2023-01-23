@@ -2,16 +2,14 @@
 
 EXTENDS Integers, TLC
 CONSTANT NumberOfNodes
-CONSTANT TotalWork
 
 VARIABLE
     TerminationDetected,
     Network,
     NodeWorking,
-    (* WorkItemsDone, *)
     Token
 
-vars == << TerminationDetected, Network, NodeWorking, (* WorkItemsDone,*) Token >>
+vars == << TerminationDetected, Network, NodeWorking, Token >>
 
 ATD == INSTANCE A3
 
@@ -27,7 +25,6 @@ NodeFinishesWork(node) ==
     /\ NodeWorking' = [NodeWorking EXCEPT ![node] = FALSE]
     /\ UNCHANGED Network
     /\ UNCHANGED TerminationDetected
-    (* /\ UNCHANGED WorkItemsDone *)
     /\ UNCHANGED Token
 
 NodePassesToken(node) == 
@@ -36,7 +33,6 @@ NodePassesToken(node) ==
     /\ Token' = Token + 1
     /\ UNCHANGED Network
     /\ UNCHANGED NodeWorking
-    (* /\ UNCHANGED WorkItemsDone *)
     /\ UNCHANGED TerminationDetected
 
 UpdateTerminationDetected ==
@@ -46,7 +42,6 @@ UpdateTerminationDetected ==
     /\ UNCHANGED NodeWorking
     /\ UNCHANGED Network
     /\ UNCHANGED NodeWorking
-    (* /\ UNCHANGED WorkItemsDone *)
     /\ UNCHANGED Token
 
 
@@ -54,8 +49,6 @@ SendMessage(sourceNode) ==
     \E destinationNode \in ATD!Nodes :
       /\ NodeWorking[sourceNode] = TRUE
       /\ Network' = [Network EXCEPT ![destinationNode] = @ + 1]
-      (* /\ WorkItemsDone' = WorkItemsDone + 1 *)
-      \* /\ WorkItemsDone < TotalWork
       /\ UNCHANGED NodeWorking
       /\ UNCHANGED TerminationDetected
       /\ UNCHANGED Token
@@ -65,7 +58,6 @@ NodeReceives(sourceNode) ==
     /\ Network' = [Network EXCEPT ![sourceNode] = @ - 1]
     /\ NodeWorking' = [NodeWorking EXCEPT ![sourceNode] = TRUE]
     /\ UNCHANGED TerminationDetected
-    (* /\ UNCHANGED WorkItemsDone *)
     /\ UNCHANGED Token
 
 DetectTermination == 
@@ -73,7 +65,6 @@ DetectTermination ==
     /\ UNCHANGED NodeWorking
     /\ UNCHANGED Network
     /\ UNCHANGED NodeWorking
-    (* /\ UNCHANGED WorkItemsDone *)
     /\ UNCHANGED Token
     /\ UNCHANGED TerminationDetected
 
@@ -81,7 +72,6 @@ Init ==
     /\ NodeWorking = [node \in ATD!Nodes |-> (node \div 2) * 2 = node ]
     /\ Network = [node \in ATD!Nodes |-> 0]
     /\ TerminationDetected = FALSE
-    (* /\ WorkItemsDone = 0 *)
     /\ Token = 1
 
 Next ==
@@ -114,7 +104,7 @@ Terminated ==
 
 
 TokenIsAccurate ==
-    DetectTermination => Terminated
+    [][DetectTermination => Terminated]_vars
 
 MyProperty ==
     /\ [][DetectTermination => Terminated]_vars

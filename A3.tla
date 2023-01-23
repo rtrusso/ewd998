@@ -2,14 +2,12 @@
 
 EXTENDS Integers
 CONSTANT NumberOfNodes 
-\* CONSTANT TotalWork
 
 VARIABLE NodeWorking
 VARIABLE TerminationDetected
 VARIABLE Network
-\* VARIABLE WorkItemsDone
 
-vars == <<NodeWorking, TerminationDetected, Network (*, WorkItemsDone*)>>
+vars == <<NodeWorking, TerminationDetected, Network >>
 
 Nodes == 1..NumberOfNodes
 
@@ -17,9 +15,6 @@ TypeOk ==
     /\ Network \in [Nodes -> Nat]
     /\ NodeWorking \in [Nodes -> {TRUE, FALSE}]
     /\ TerminationDetected \in {TRUE, FALSE}
-    (* /\ WorkItemsDone \in Nat
-    /\ WorkItemsDone >= 0 *)
-    \* /\ WorkItemsDone <= TotalWork
 
 Terminated == 
     /\ \A node \in Nodes : NodeWorking[node] = FALSE
@@ -29,7 +24,6 @@ Init ==
     /\ NodeWorking = [node \in Nodes |-> (node \div 2) * 2 = node ]
     /\ Network = [node \in Nodes |-> 0]
     /\ TerminationDetected = FALSE
-    (* /\ WorkItemsDone = 0 *)
 
 NodeFinishesWork(node) ==
     /\ NodeWorking[node] = TRUE
@@ -37,14 +31,12 @@ NodeFinishesWork(node) ==
     /\ NodeWorking' = [NodeWorking EXCEPT ![node] = FALSE]
     /\ UNCHANGED Network
     /\ UNCHANGED TerminationDetected
-    (* /\ UNCHANGED WorkItemsDone *)
 
 NodePassesToken(node) == 
     /\ TRUE
     /\ UNCHANGED Network
     /\ UNCHANGED TerminationDetected
     /\ UNCHANGED NodeWorking
-    (* /\ UNCHANGED WorkItemsDone *)
 
 DetectTermination == 
     /\ TerminationDetected = FALSE
@@ -52,14 +44,11 @@ DetectTermination ==
     /\ TerminationDetected' = TRUE
     /\ UNCHANGED Network
     /\ UNCHANGED NodeWorking
-    (* /\ UNCHANGED WorkItemsDone *)
 
 SendMessage(sourceNode) ==
     \E destinationNode \in Nodes :
       /\ NodeWorking[sourceNode] = TRUE
       /\ Network' = [Network EXCEPT ![destinationNode] = @ + 1]
-      (* /\ WorkItemsDone' = WorkItemsDone + 1 *)
-      \* /\ WorkItemsDone < TotalWork
       /\ UNCHANGED NodeWorking
       /\ UNCHANGED TerminationDetected
 
@@ -68,7 +57,6 @@ NodeReceives(sourceNode) ==
     /\ Network' = [Network EXCEPT ![sourceNode] = @ - 1]
     /\ NodeWorking' = [NodeWorking EXCEPT ![sourceNode] = TRUE]
     /\ UNCHANGED TerminationDetected
-    (* /\ UNCHANGED WorkItemsDone *)
 
 NetworkIsFinite ==
     \A node \in Nodes : Network[node] <= 3
