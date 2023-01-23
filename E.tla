@@ -17,7 +17,7 @@ vars == << TerminationDetected, Network, NodeWorking, TokenOwner, NodeMessageCou
 
 ATD == INSTANCE A3
 Nodes == ATD!Nodes
-Colors == { "Pink", "Green" }
+Colors == { "Purple", "Green" }
 
 TypeOk ==
     /\ TokenOwner \in Nat
@@ -35,8 +35,8 @@ Init ==
     /\ TerminationDetected = FALSE
     /\ TokenOwner = 1
     /\ NodeMessageCounter = [node \in ATD!Nodes |-> 0]
-    /\ NodeColor = [node \in Nodes |-> "Pink"]
-    /\ TokenColor = "Pink"
+    /\ NodeColor = [node \in Nodes |-> "Purple"]
+    /\ TokenColor = "Purple"
     /\ TokenCounter = 0
 
 NodeFinishesWork(node) ==
@@ -85,9 +85,10 @@ NodeReceives(sourceNode) ==
     /\ Network' = [Network EXCEPT ![sourceNode] = @ - 1]
     /\ NodeWorking' = [NodeWorking EXCEPT ![sourceNode] = TRUE]
     /\ NodeMessageCounter' = [NodeMessageCounter EXCEPT ![sourceNode] = @ - 1]
+    /\ NodeColor' = [NodeColor EXCEPT ![sourceNode] = "Green"]
     /\ UNCHANGED TerminationDetected
     /\ UNCHANGED TokenOwner
-    /\ UNCHANGED << NodeColor, TokenColor, TokenCounter >>
+    /\ UNCHANGED << TokenColor, TokenCounter >>
 
 DetectTermination == 
     /\ TokenOwner = NumberOfNodes+1
