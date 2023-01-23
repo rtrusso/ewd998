@@ -157,7 +157,10 @@ TerminationDetectionIsStable ==
     [][TerminationDetected => TerminationDetected']_TerminationDetected
 
 NetworkIsFinite ==
-    \A node \in ATD!Nodes : Network[node] <= 3
+    \A node \in Nodes : Network[node] <= 3
+
+AllMessagesEventuallySent ==
+    <>[][\A node \in Nodes : Network[node] = 0]_vars
 
 (** Try to find a trace that causes some condition to happen - this 
 will 'fail' and show the state trace **)
