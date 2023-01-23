@@ -53,11 +53,12 @@ NodePassesToken(node) ==
     /\ TokenOwner = node
     /\ NodeWorking[node] = FALSE
     /\ TokenOwner' = TokenOwner + 1
+    /\ TokenCounter' = TokenCounter + NodeMessageCounter[node]
     /\ UNCHANGED Network
     /\ UNCHANGED NodeWorking
     /\ UNCHANGED TerminationDetected
     /\ UNCHANGED NodeMessageCounter
-    /\ UNCHANGED << NodeColor, TokenColor, TokenCounter >>
+    /\ UNCHANGED << NodeColor, TokenColor >>
 
 UpdateTerminationDetected ==
     /\ TerminationDetected = FALSE
