@@ -15,6 +15,8 @@ VARIABLE
 
 vars == << TerminationDetected, Network, NodeWorking, TokenOwner, NodeMessageCounter, NodeColor, TokenColor, TokenCounter >>
 
+VarsWithoutTokenOwner == << TerminationDetected, Network, NodeWorking, NodeMessageCounter, NodeColor, TokenColor, TokenCounter >>
+
 ATD == INSTANCE A3
 Nodes == ATD!Nodes
 Colors == { "Purple", "Green" }
@@ -102,11 +104,11 @@ InitiateNewRound ==
     /\ (TokenColor = "Green" \/ TokenCounter # 0)
     /\ TokenOwner' = 1
     /\ TokenColor' = "Purple"
-    \* /\ TokenCounter' = 0
+    /\ TokenCounter' = 0
     /\ NodeColor' = [NodeColor EXCEPT ![1] = "Purple"]
     /\ UNCHANGED << Network, TerminationDetected >>
     /\ UNCHANGED << NodeWorking, NodeMessageCounter >>
-    /\ UNCHANGED << TokenCounter >>
+    \* /\ UNCHANGED << TokenCounter >>
 
 Next ==
     \E node \in ATD!Nodes :
@@ -136,7 +138,6 @@ Terminated ==
     /\ \A node \in ATD!Nodes : NodeWorking[node] = FALSE
     /\ \A node \in ATD!Nodes : Network[node] = 0
 
-
 TokenIsAccurate ==
     [][DetectTermination => Terminated]_vars
 
@@ -158,5 +159,30 @@ TerminationDetectionIsStable ==
 NetworkIsFinite ==
     \A node \in ATD!Nodes : Network[node] <= 3
 
+(** Try to find a trace that causes some condition to happen - this 
+will 'fail' and show the state trace **)
+VerifyThatTokenCanBePastANodeThatReceivesAMessage ==
+    [][~(
+        /\ NodeMessageCounter[3] = 2
+        /\ NodeMessageCounter'[3] = 1
+        /\ TokenOwner = 3
+    )]_vars
+
+MyAlias == [
+    ATDTerminated |-> ATD!Terminated,
+    NextEnabled |-> ENABLED(Next),
+    SendMessageEnabled |-> [
+        node \in Nodes|-> ENABLED(SendMessage(node))
+    ]
+]
+
+
+(**
+temporal forumla - must specify multiple states using always[] or eventually<> operators, leads-to
+action formula - must have primed variables
+
+<>X == ~[]~X
+
+**)
 
 ====

@@ -7,7 +7,7 @@ VARIABLE NodeWorking
 VARIABLE TerminationDetected
 VARIABLE Network
 
-vars == <<NodeWorking, TerminationDetected, Network >>
+vars == << NodeWorking, TerminationDetected, Network >>
 
 Nodes == 1..NumberOfNodes
 
