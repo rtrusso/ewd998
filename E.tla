@@ -171,7 +171,7 @@ VerifyThatTokenCanBePastANodeThatReceivesAMessage ==
     [][~(
         /\ NodeMessageCounter[3] = 2
         /\ NodeMessageCounter'[3] = 1
-        /\ TokenOwner = 3
+        /\ TokenOwner = 2
     )]_vars
 
 MyAlias == [
